@@ -15,12 +15,12 @@ loadVariables
 printf "Insert OTP code: "
 read -r tokenCode
 
-tokenResponse="$(aws sts get-session-token --serial-number "$AWS_MFA_ARN" --token-code "$tokenCode" --profile "$BASE_PROFILE" --output yaml)"
+tokenResponse="$(aws sts get-session-token --serial-number "$AWS_MFA_ARN" --token-code "$tokenCode" --profile "$BASE_PROFILE" --output yaml)" && {
+    accessKeyId="$(echo "$tokenResponse" | grep AccessKeyId: | cut -d ' ' -f 4)"
+    secretAccessKey="$(echo "$tokenResponse" | grep SecretAccessKey: | cut -d ' ' -f 4)"
+    sessionToken="$(echo "$tokenResponse" | grep SessionToken: | cut -d ' ' -f 4)"
 
-accessKeyId="$(echo "$tokenResponse" | grep AccessKeyId: | cut -d ' ' -f 4)"
-secretAccessKey="$(echo "$tokenResponse" | grep SecretAccessKey: | cut -d ' ' -f 4)"
-sessionToken="$(echo "$tokenResponse" | grep SessionToken: | cut -d ' ' -f 4)"
-
-aws configure set aws_access_key_id "$accessKeyId" --profile default
-aws configure set aws_secret_access_key "$secretAccessKey" --profile default
-aws configure set aws_session_token "$sessionToken" --profile default
+    aws configure set aws_access_key_id "$accessKeyId" --profile default
+    aws configure set aws_secret_access_key "$secretAccessKey" --profile default
+    aws configure set aws_session_token "$sessionToken" --profile default
+}
